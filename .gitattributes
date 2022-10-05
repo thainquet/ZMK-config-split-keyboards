@@ -1,0 +1,5 @@
+*.psd filter=lfs diff=lfs merge=lfs -text
+*.step filter=lfs diff=lfs merge=lfs -text
+*.FCStd1 filter=lfs diff=lfs merge=lfs -text
+*.FCSTD filter=lfs diff=lfs merge=lfs -text
+*.FCStd filter=lfs diff=lfs merge=lfs -text
