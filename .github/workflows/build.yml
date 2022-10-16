@@ -1,4 +1,4 @@
-name: build
+name: Build ZMK User Config
 
 on: [push, pull_request, workflow_dispatch]
 
@@ -52,33 +52,25 @@ jobs:
         env:
           cache_name: cache-zephyr-${{ env.zephyr_version }}-modules
         with:
+          key: ${{ runner.os }}-build-${{ env.cache_name }}-${{ hashFiles('**/west.yml', '**/build.yaml') }}
+          restore-keys: ${{ runner.os }}-build-${{ env.cache_name }}-
           path: |
             modules/
             tools/
             zephyr/
             bootloader/
             zmk/
-          key: ${{ runner.os }}-build-${{ env.cache_name }}-${{ hashFiles('**/west.yml', '**/build.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-build-${{ env.cache_name }}-
-            ${{ runner.os }}-build-
-            ${{ runner.os }}-
-      - name: West Init
-        run: west init -l ${{ inputs.config_path }}
-
-      - name: West Update
-        run: west update
-
-      - name: West Zephyr export
-        run: west zephyr-export
-
-      - name: West Build (${{ env.display_name }})
+      - name: West setup
+        shell: sh -x {0}
+        run: |
+          west init -l ${{ inputs.config_path }}
+          west update
+          west zephyr-export
+      - name: West build (${{ env.display_name }})
         shell: sh -x {0}
         run: |
           west build -s zmk/app -b ${{ matrix.board }} -- -DZMK_CONFIG=${GITHUB_WORKSPACE}/${{ inputs.config_path }} ${{ env.extra_cmake_args }} ${{ matrix.cmake-args }}
-      - name: ${{ env.display_name }} Kconfig file
-        run: grep -v -e "^#" -e "^$" build/zephyr/.config | sort
-
+          grep -v -e "^#" -e "^$" build/zephyr/.config | sort
       - name: Rename artifacts
         shell: sh -x {0}
         run: |
@@ -93,5 +85,6 @@ jobs:
       - name: Archive (${{ env.display_name }})
         uses: actions/upload-artifact@v3
         with:
+          retention-days: ${{ inputs.archive_days }}
           name: ${{ inputs.archive_name }}
           path: build/artifacts
