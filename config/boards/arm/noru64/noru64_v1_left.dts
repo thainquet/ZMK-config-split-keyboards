@@ -89,7 +89,7 @@
         mosi-pin = <13>;
         
         // Unused pins, needed for SPI definition, but not used by the ws2812 driver itself.
-        sck-pin = <25>;
+        sck-pin = <40>;
         miso-pin = <6>;
     
         led_strip: ws2812@0 {
