@@ -3,4 +3,4 @@ on: [push, workflow_dispatch]
 
 jobs:
   build:
-    uses: .github/workflows/build-user-config.yml
+    uses: filterpaper/scripts/.github/workflows/build-user-config.yml@main
