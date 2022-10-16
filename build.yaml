@@ -1,8 +1,8 @@
 # GitHub Actions matrix
 ---
 board:
-  - nice_nano_v2
+  - noru64_v1_left
+  - noru64_v1_right
+  - nrfmicro_13
 shield:
- - cradio_left
- - cradio_right
- - settings_reset
+  - settings_reset
