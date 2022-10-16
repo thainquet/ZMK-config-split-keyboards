@@ -1,28 +1,6 @@
-name: Reusable user config build
+on: [push, pull_request, workflow_dispatch]
 
-on:
-  workflow_call:
-    inputs:
-      build_matrix_path:
-        description: "Path to the build matrix file"
-        default: "build.yaml"
-        required: false
-        type: string
-      config_path:
-        description: "Path to the config directory"
-        default: "config"
-        required: false
-        type: string
-      fallback_binary:
-        description: "Fallback binary format, if no *.uf2 file was built"
-        default: "bin"
-        required: false
-        type: string
-      archive_name:
-        description: 'Archive output file name'
-        default: 'firmware'
-        required: false
-        type: string
+name: Build
 
 jobs:
   matrix:
@@ -33,10 +11,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3.1.0
-
       - name: Install yaml2json
         run: python3 -m pip install remarshal
-
       - name: Fetch Build Matrix
         run: |
           echo "build_matrix=$(yaml2json ${{ inputs.build_matrix_path }} | jq -c .)" >> $GITHUB_ENV
@@ -54,8 +30,7 @@ jobs:
       - name: Prepare variables
         shell: sh -x {0}
         run: |
-          if [ -n "${{ matrix.shield }}" ]
-          then
+          if [ -n "${{ matrix.shield }}" ]; then
             echo "extra_cmake_args=-DSHIELD=\"${{ matrix.shield }}\"" >> $GITHUB_ENV
             echo "artifact_name=${{ matrix.shield }}-${{ matrix.board }}-zmk" >> $GITHUB_ENV
             echo "display_name=${{ matrix.shield }} - ${{ matrix.board }}" >> $GITHUB_ENV
@@ -64,10 +39,9 @@ jobs:
             echo "artifact_name=${{ matrix.board }}-zmk" >> $GITHUB_ENV
             echo "display_name=${{ matrix.board }}" >> $GITHUB_ENV
           fi
-          echo "zephyr_version=${ZEPHYR_VERSION}" >> $GITHUB_ENV
+            echo "zephyr_version=${ZEPHYR_VERSION}" >> $GITHUB_ENV
       - name: Checkout
         uses: actions/checkout@v3.1.0
-
       - name: Cache west modules
         uses: actions/cache@v3.0.11
         continue-on-error: true
@@ -86,21 +60,22 @@ jobs:
             ${{ runner.os }}-build-
             ${{ runner.os }}-
       - name: West Init
-        run: west init -l ${{ inputs.config_path }}
-
+        run: west init -l config
       - name: West Update
         run: west update
-
       - name: West Zephyr export
         run: west zephyr-export
-
       - name: West Build (${{ env.display_name }})
         shell: sh -x {0}
         run: |
           west build -s zmk/app -b ${{ matrix.board }} -- -DZMK_CONFIG=${GITHUB_WORKSPACE}/${{ inputs.config_path }} ${{ env.extra_cmake_args }} ${{ matrix.cmake-args }}
+      - name: ${{ env.display_name }} DTS File
+        if: ${{ always() }}
+        run: |
+          if [ -f "build/zephyr/${{ matrix.board }}.dts.pre.tmp" ]; then cat -n build/zephyr/${{ matrix.board }}.dts.pre.tmp; fi
+          if [ -f "build/zephyr/zephyr.dts" ]; then cat -n build/zephyr/zephyr.dts; fi
       - name: ${{ env.display_name }} Kconfig file
-        run: grep -v -e "^#" -e "^$" build/zephyr/.config | sort
-
+        run: cat build/zephyr/.config | grep -v "^#" | grep -v "^$"
       - name: Rename artifacts
         shell: sh -x {0}
         run: |
@@ -108,9 +83,9 @@ jobs:
           if [ -f build/zephyr/zmk.uf2 ]
           then
             cp build/zephyr/zmk.uf2 "build/artifacts/${{ env.artifact_name }}.uf2"
-          elif [ -f build/zephyr/zmk.${{ inputs.fallback_binary }} ]
+          elif [ -f build/zephyr/zmk.hex ]
           then
-            cp build/zephyr/zmk.${{ inputs.fallback_binary }} "build/artifacts/${{ env.artifact_name }}.${{ inputs.fallback_binary }}"
+            cp build/zephyr/zmk.hex "build/artifacts/${{ env.artifact_name }}.hex"
           fi
       - name: Archive (${{ env.display_name }})
         uses: actions/upload-artifact@v3
