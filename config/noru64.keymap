@@ -14,6 +14,11 @@
 
 #include <behaviors.dtsi>
 #include <dt-bindings/zmk/keys.h>
+#include <dt-bindings/zmk/bt.h>
+#include <dt-bindings/zmk/outputs.h>
+#include <dt-bindings/zmk/backlight.h>
+#include <dt-bindings/zmk/rgb.h>
+#include <dt-bindings/zmk/ext_power.h>
 
 / {
     keymap {
@@ -30,7 +35,7 @@
             >;
         };
 
-        layer_layer_function_layer {
+        layer_function_layer {
             bindings = <
  &kp GRAVE  &kp F1  &kp F2  &kp F3  &kp F4  &kp F5  &kp F6  &kp F7  &kp F8  &kp F9  &kp F10  &kp F11  &kp F12          &trans  &trans
     &trans  &trans  &trans   &none   &none           &none   &none   &none   &none    &none    &none    &none   &none  &trans  &trans
@@ -40,13 +45,13 @@
             >;
         };
 
-        layer_Layer__2 {
+        layer_control_layer {
             bindings = <
- &trans  &trans  &trans  &trans  &trans  &trans  &trans  &trans  &trans  &trans  &trans  &trans  &trans          &trans  &trans
- &trans  &trans  &trans  &trans  &trans          &trans  &trans  &trans  &trans  &trans  &trans  &trans  &trans  &trans  &trans
- &trans  &trans  &trans  &trans          &trans  &trans  &trans  &trans  &trans  &trans  &trans  &trans          &trans  &trans
- &trans          &trans  &trans  &trans  &trans  &trans  &trans  &trans  &trans  &trans          &trans  &trans  &trans  &trans
- &trans  &trans  &trans  &trans                  &trans          &trans          &trans  &trans          &trans  &trans  &trans
+        &bt BT_CLR       &bt BT_NXT            &none            &none            &none            &none            &none   &none   &none   &none   &none   &none  &trans          &trans  &trans
+      &out OUT_TOG            &none       &bl BL_TOG       &bl BL_INC       &bl BL_DEC                      &bl BL_CYCLE   &none   &none   &none   &none   &none   &none   &none  &trans  &trans
+   &rgb_ug RGB_TOG  &rgb_ug RGB_EFF  &rgb_ug RGB_HUI  &rgb_ug RGB_SAI                   &rgb_ug RGB_BRI  &rgb_ug RGB_SPI   &none   &none   &none   &none   &none   &none          &trans  &trans
+ &ext_power EP_TOG                             &none  &rgb_ug RGB_HUD  &rgb_ug RGB_SAD  &rgb_ug RGB_BRD  &rgb_ug RGB_SPD   &none   &none   &none   &none           &none  &trans  &trans  &trans
+            &trans           &trans           &trans           &trans                                             &trans          &trans          &trans  &trans          &trans  &trans  &trans
             >;
         };
 
